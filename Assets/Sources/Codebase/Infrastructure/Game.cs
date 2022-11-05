@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace Sources.Codebase.Infrastructure
 {
+    [RequireComponent(typeof(AudioSource))]
     public class Game : MonoBehaviour, ICoroutineRunner
     {
         private const string AttemptsKey = "Attempts";
@@ -16,7 +17,7 @@ namespace Sources.Codebase.Infrastructure
         [SerializeField] private FlappyBall FlappyBallPrefab;
         [SerializeField] private Line LinePrefab;
         [SerializeField] private EnemyBall EnemyBallPrefab;
-        private Camera _mainCamera;
+        [SerializeField] private AudioClip BackgroundAudioClip;
 
         private Difficulty _selectedDifficulty = Difficulty.Easy;
         private int[] _allDifficultiesInts;
@@ -32,6 +33,9 @@ namespace Sources.Codebase.Infrastructure
         private void Start()
         {
             _attemptsCount = PlayerPrefs.GetInt(AttemptsKey, 0);
+            AudioSource audioSource = GetComponent<AudioSource>();
+            audioSource.clip = BackgroundAudioClip;
+            audioSource.Play();
             _uiProvider = new UIProvider();
             _uiProvider.InstallMainMenu(MainMenuRootPrefab, ChangeDifficulty, StartLevel);
             _levelRoot = new GameObject("Level Root");
