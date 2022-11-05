@@ -12,16 +12,26 @@ namespace Sources.Codebase.Helpers
         [SerializeField] private TextMeshProUGUI AttemptsCountLabel;
         [SerializeField] private Button ChangeDifficultyButton;
         [SerializeField] private Button RestartButton;
-        private StringBuilder _stringBuilder;
+        public event Action OnRestartClicked;
+        public event Action OnChangeDifficultyClicked;
+        private StringBuilder _lastAttemptStringBuilder;
+        private StringBuilder _attemptCountStringBuilder;
 
         private void Awake()
         {
-            _stringBuilder = new StringBuilder(LastAttemptLabel.text);
+            _lastAttemptStringBuilder = new StringBuilder(LastAttemptLabel.text);
+            _attemptCountStringBuilder = new StringBuilder(AttemptsCountLabel.text);
+            RestartButton.onClick.AddListener(() => OnRestartClicked?.Invoke());
+            ChangeDifficultyButton.onClick.AddListener(() => OnChangeDifficultyClicked?.Invoke());
         }
 
         public void SetLastAttemptTime(TimeSpan timeSpan)
         {
-            LastAttemptLabel.text = _stringBuilder.ToString().Replace("{time}", timeSpan.ToString("g"));
+            LastAttemptLabel.text = _lastAttemptStringBuilder.ToString().Replace("{time}", timeSpan.ToString("g"));
+        }
+        public void SetAttemptsCount(int count)
+        {
+            AttemptsCountLabel.text = _attemptCountStringBuilder.ToString().Replace("{count}", count.ToString());
         }
     }
 }

@@ -8,6 +8,7 @@ namespace Sources.Codebase
 {
     public class Game : MonoBehaviour, ICoroutineRunner
     {
+        private const string AttemptsKey = "Attempts";
         [SerializeField] private MainMenuRoot MainMenuRootPrefab;
         [SerializeField] private GameLoopUIRoot GameLoopUIRootPrefab;
         [SerializeField] private EndGameUIRoot EndGameUIRootPrefab;
@@ -22,15 +23,18 @@ namespace Sources.Codebase
         private int[] AllDifficultiesInts => _allDifficultiesInts ??= ((int[])Enum.GetValues(typeof(Difficulty)));
         private FlappyBall _flappyBall;
         private GameObject _levelRoot;
-        private Line[] _lines = new Line[2];
+        private readonly Line[] _lines = new Line[2];
         private TimeCounter _timeCounter;
+        private int _attemptsCount;
 
         private void Start()
         {
+            _attemptsCount = PlayerPrefs.GetInt(AttemptsKey, 0);
             _mainCamera = Camera.main;
             InstallMainMenu();
             InstallGameLoopUI();
             InstallEndGameUI();
+            InstallGameLevel();
             _timeCounter = new TimeCounter(this);
         }
 
@@ -44,25 +48,26 @@ namespace Sources.Codebase
 
         private void InstallGameLevel()
         {
-            _levelRoot = new GameObject("LevelRoot");
             _levelRoot.transform.position = Vector3.zero;
             _flappyBall = Instantiate(FlappyBallPrefab, _levelRoot.transform);
             _lines[0] = Instantiate(LinePrefab, _levelRoot.transform);
             _lines[0].Transform.position = new Vector3(5, 4.5f, 0);
             _lines[1] = Instantiate(LinePrefab, _levelRoot.transform);
             _lines[1].Transform.position = new Vector3(5, -4.5f, 0);
-            foreach (var line in _lines)
-            {
-                line.SetSpeed(_selectedDifficulty);
-            }
 
             _gameLoopUIRoot.UpButton.OnButtonDown += () => _flappyBall.GetUp();
             _gameLoopUIRoot.UpButton.OnButtonUp += () => _flappyBall.GetDown();
 
-            _flappyBall.OnCollidedWithLine += BallCollidedWithLineHandler;
+            _levelRoot.gameObject.SetActive(false);
 
-            _timeCounter.OnTimePassed += UpdatePassedTimeLabel;
-            _timeCounter.Start();
+        }
+
+        private void UpdateDifficultyForLines()
+        {
+            foreach (var line in _lines)
+            {
+                line.SetSpeed(_selectedDifficulty);
+            }
         }
 
         private void BallCollidedWithLineHandler()
@@ -80,23 +85,48 @@ namespace Sources.Codebase
         {
             _endGameUIRoot = Instantiate(EndGameUIRootPrefab);
             _endGameUIRoot.Canvas.worldCamera = _mainCamera;
+            _endGameUIRoot.OnRestartClicked += RestartLevelAndDisableEndGameUI;
+            _endGameUIRoot.OnChangeDifficultyClicked += GoToMainMenu;
             _endGameUIRoot.gameObject.SetActive(false);
+        }
+
+        private void GoToMainMenu()
+        {
+            _endGameUIRoot.gameObject.SetActive(false);
+            _mainMenuRoot.gameObject.SetActive(true);
+        }
+
+        private void RestartLevelAndDisableEndGameUI()
+        {
+            _endGameUIRoot.gameObject.SetActive(false);
+            ResetAndEnableLevel();
+        }
+
+        private void ResetAndEnableLevel()
+        {
+            _flappyBall.Reset();
+            _flappyBall.OnCollidedWithLine += BallCollidedWithLineHandler;
+            _levelRoot.gameObject.SetActive(true);
+            _timeCounter.OnTimePassed += UpdatePassedTimeLabel;
+            _timeCounter.Start();
         }
 
         private void EndGame()
         {
+            _attemptsCount++;
             _levelRoot.gameObject.SetActive(false);
-            _gameLoopUIRoot.gameObject.SetActive(false);
             _endGameUIRoot.gameObject.SetActive(true);
             _timeCounter.OnTimePassed -= UpdatePassedTimeLabel;
             _endGameUIRoot.SetLastAttemptTime(_timeCounter.Stop());
+            _endGameUIRoot.SetAttemptsCount(_attemptsCount);
         }
 
         private void InstallGameLoopUI()
         {
-            _gameLoopUIRoot = Instantiate(GameLoopUIRootPrefab);
+            _levelRoot = new GameObject("LevelRoot");
+            _gameLoopUIRoot = Instantiate(GameLoopUIRootPrefab, _levelRoot.transform);
             _gameLoopUIRoot.Canvas.worldCamera = _mainCamera;
-            _gameLoopUIRoot.gameObject.SetActive(false);
+            //_gameLoopUIRoot.gameObject.SetActive(false);
         }
 
         private void ChangeDifficulty(int dropdownIndex)
@@ -105,6 +135,7 @@ namespace Sources.Codebase
             {
                 _selectedDifficulty = (Difficulty)dropdownIndex;
                 Debug.Log("Player selected difficulty: " + _selectedDifficulty);
+                UpdateDifficultyForLines();
                 return;
             }
 
@@ -116,12 +147,14 @@ namespace Sources.Codebase
             Debug.Log($"Player started game with {_selectedDifficulty} difficulty");
             _mainMenuRoot.gameObject.SetActive(false);
             _gameLoopUIRoot.gameObject.SetActive(true);
-            InstallGameLevel();
+            ResetAndEnableLevel();
+            
         }
 
-        public void StopCoroutine()
+        private void OnDisable()
         {
-            throw new NotImplementedException();
+            PlayerPrefs.SetInt(AttemptsKey, _attemptsCount);
+            PlayerPrefs.Save();
         }
     }
 }

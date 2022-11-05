@@ -12,7 +12,6 @@ namespace Sources.Codebase
         private Transform _cachedTransform;
         private Coroutine _currentMovementRoutine;
         private Coroutine _currentSpeedIncreasingRoutine;
-        private CircleCollider2D _collider;
         private bool _isDowning = true;
 
         public void GetUp()
@@ -25,10 +24,16 @@ namespace Sources.Codebase
             _isDowning = true;
         }
 
+        public void Reset()
+        {
+            transform.position = Vector3.zero;
+            _verticalSpeed = 1f;
+            _isDowning = true;
+        }
+
         private void Awake()
         {
             _cachedTransform = transform;
-            _collider = GetComponent<CircleCollider2D>();
         }
 
         private void OnCollisionEnter2D(Collision2D collision)
