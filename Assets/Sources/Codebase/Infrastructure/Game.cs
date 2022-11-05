@@ -1,10 +1,11 @@
 using System;
 using System.Linq;
+using Sources.Codebase.GameEntities;
 using Sources.Codebase.Helpers;
-using Unity.Mathematics;
+using Sources.Codebase.Infrastructure.UI;
 using UnityEngine;
 
-namespace Sources.Codebase
+namespace Sources.Codebase.Infrastructure
 {
     public class Game : MonoBehaviour, ICoroutineRunner
     {
@@ -16,9 +17,7 @@ namespace Sources.Codebase
         [SerializeField] private Line LinePrefab;
         [SerializeField] private EnemyBall EnemyBallPrefab;
         private Camera _mainCamera;
-        private MainMenuRoot _mainMenuRoot;
-        private GameLoopUIRoot _gameLoopUIRoot;
-        private EndGameUIRoot _endGameUIRoot;
+
         private Difficulty _selectedDifficulty = Difficulty.Easy;
         private int[] _allDifficultiesInts;
         private int[] AllDifficultiesInts => _allDifficultiesInts ??= ((int[])Enum.GetValues(typeof(Difficulty)));
@@ -28,25 +27,20 @@ namespace Sources.Codebase
         private TimeCounter _timeCounter;
         private int _attemptsCount;
         private EnemyBallsGenerator _enemyBallsGenerator;
+        private UIProvider _uiProvider;
 
         private void Start()
         {
             _attemptsCount = PlayerPrefs.GetInt(AttemptsKey, 0);
-            _mainCamera = Camera.main;
-            InstallMainMenu();
-            InstallGameLoopUI();
-            InstallEndGameUI();
+            _uiProvider = new UIProvider();
+            _uiProvider.InstallMainMenu(MainMenuRootPrefab, ChangeDifficulty, StartLevel);
+            _levelRoot = new GameObject("Level Root");
+            _uiProvider.InstallGameLoopUI(GameLoopUIRootPrefab, _levelRoot.transform);
+            _uiProvider.InstallEndGameUI(EndGameUIRootPrefab, RestartLevelAndDisableEndGameUI, GoToMainMenu);
             InstallGameLevel();
             _timeCounter = new TimeCounter(this);
         }
 
-        private void InstallMainMenu()
-        {
-            _mainMenuRoot = Instantiate(MainMenuRootPrefab);
-            _mainMenuRoot.DifficultyDropdown.onValueChanged.AddListener(ChangeDifficulty);
-            _mainMenuRoot.StartButton.onClick.AddListener(StartLevel);
-            _mainMenuRoot.Canvas.worldCamera = _mainCamera;
-        }
 
         private void InstallGameLevel()
         {
@@ -57,18 +51,16 @@ namespace Sources.Codebase
             _lines[1] = Instantiate(LinePrefab, _levelRoot.transform);
             _lines[1].Transform.position = new Vector3(5, -4.5f, 0);
 
-            _gameLoopUIRoot.UpButton.OnButtonDown += () => _flappyBall.GetUp();
-            _gameLoopUIRoot.UpButton.OnButtonUp += () => _flappyBall.GetDown();
+            _uiProvider.GameLoopUIButtonUp.OnButtonDown += () => _flappyBall.GetUp();
+            _uiProvider.GameLoopUIButtonUp.OnButtonUp += () => _flappyBall.GetDown();
             InstallEnemyGenerator();
             _levelRoot.gameObject.SetActive(false);
-
         }
 
         private void InstallEnemyGenerator()
         {
             var enemyBallsPool = new EnemyBallsPool(EnemyBallPrefab, _levelRoot.transform);
             _enemyBallsGenerator = new EnemyBallsGenerator(enemyBallsPool, this);
-            
         }
 
         private void UpdateDifficultyForLines()
@@ -81,33 +73,19 @@ namespace Sources.Codebase
 
         private void BallCollidedWithObstacleHandler()
         {
-            _flappyBall.OnCollidedWithObstacle -= BallCollidedWithObstacleHandler; 
+            _flappyBall.OnCollidedWithObstacle -= BallCollidedWithObstacleHandler;
             EndGame();
-        }
-
-        private void UpdatePassedTimeLabel(TimeSpan timeSpan)
-        {
-            _gameLoopUIRoot.SetTimePassedLabel(timeSpan);
-        }
-
-        private void InstallEndGameUI()
-        {
-            _endGameUIRoot = Instantiate(EndGameUIRootPrefab);
-            _endGameUIRoot.Canvas.worldCamera = _mainCamera;
-            _endGameUIRoot.OnRestartClicked += RestartLevelAndDisableEndGameUI;
-            _endGameUIRoot.OnChangeDifficultyClicked += GoToMainMenu;
-            _endGameUIRoot.gameObject.SetActive(false);
         }
 
         private void GoToMainMenu()
         {
-            _endGameUIRoot.gameObject.SetActive(false);
-            _mainMenuRoot.gameObject.SetActive(true);
+            _uiProvider.DisableEndGameMenu();
+            _uiProvider.EnableMainMenu();
         }
 
         private void RestartLevelAndDisableEndGameUI()
         {
-            _endGameUIRoot.gameObject.SetActive(false);
+            _uiProvider.DisableEndGameMenu();
             ResetAndEnableLevel();
         }
 
@@ -117,7 +95,7 @@ namespace Sources.Codebase
             _flappyBall.OnCollidedWithObstacle += BallCollidedWithObstacleHandler;
             _levelRoot.gameObject.SetActive(true);
             _enemyBallsGenerator.Enable(_selectedDifficulty);
-            _timeCounter.OnTimePassed += UpdatePassedTimeLabel;
+            _timeCounter.OnTimePassed += _uiProvider.SetTimePassedToGameLoopUI;
             _timeCounter.Start();
         }
 
@@ -126,40 +104,26 @@ namespace Sources.Codebase
             _attemptsCount++;
             _enemyBallsGenerator.Disable();
             _levelRoot.gameObject.SetActive(false);
-            _endGameUIRoot.gameObject.SetActive(true);
-            _timeCounter.OnTimePassed -= UpdatePassedTimeLabel;
-            _endGameUIRoot.SetLastAttemptTime(_timeCounter.Stop());
-            _endGameUIRoot.SetAttemptsCount(_attemptsCount);
+            _uiProvider.EnableEndGameMenu();
+            _timeCounter.OnTimePassed -= _uiProvider.SetTimePassedToGameLoopUI;
+            _uiProvider.SetLastAttemptTimeToEndMenu(_timeCounter.Stop());
+            _uiProvider.SetAttemptsCount(_attemptsCount);
         }
 
-        private void InstallGameLoopUI()
-        {
-            _levelRoot = new GameObject("LevelRoot");
-            _gameLoopUIRoot = Instantiate(GameLoopUIRootPrefab, _levelRoot.transform);
-            _gameLoopUIRoot.Canvas.worldCamera = _mainCamera;
-            //_gameLoopUIRoot.gameObject.SetActive(false);
-        }
 
         private void ChangeDifficulty(int dropdownIndex)
         {
             if (AllDifficultiesInts.Contains(dropdownIndex))
             {
                 _selectedDifficulty = (Difficulty)dropdownIndex;
-                Debug.Log("Player selected difficulty: " + _selectedDifficulty);
                 UpdateDifficultyForLines();
-                return;
             }
-
-            Debug.LogError("Player selected dropdownItem that not exists in Difficulty enum");
         }
 
         private void StartLevel()
         {
-            Debug.Log($"Player started game with {_selectedDifficulty} difficulty");
-            _mainMenuRoot.gameObject.SetActive(false);
-            _gameLoopUIRoot.gameObject.SetActive(true);
+            _uiProvider.DisableMainMenu();
             ResetAndEnableLevel();
-            
         }
 
         private void OnDisable()

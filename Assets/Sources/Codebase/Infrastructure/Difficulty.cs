@@ -1,4 +1,4 @@
-﻿namespace Sources.Codebase.Helpers
+﻿namespace Sources.Codebase.Infrastructure
 {
     public enum Difficulty
     {

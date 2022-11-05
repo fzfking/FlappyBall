@@ -1,8 +1,7 @@
-﻿using System;
-using Sources.Codebase.Helpers;
+﻿using Sources.Codebase.Infrastructure;
 using UnityEngine;
 
-namespace Sources.Codebase
+namespace Sources.Codebase.GameEntities
 {
     [RequireComponent(typeof(Animation))]
     public class Line : MonoBehaviour

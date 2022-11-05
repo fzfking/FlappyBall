@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections;
-using Sources.Codebase.Helpers;
+using Sources.Codebase.Infrastructure;
 using UnityEngine;
 
-namespace Sources.Codebase
+namespace Sources.Codebase.GameEntities
 {
     public class EnemyBall : MonoBehaviour
     {

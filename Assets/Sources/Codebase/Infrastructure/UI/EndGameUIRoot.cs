@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Text;
+using Sources.Codebase.Helpers;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Sources.Codebase.Helpers
+namespace Sources.Codebase.Infrastructure.UI
 {
     public class EndGameUIRoot : UIRoot
     {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using Sources.Codebase.Infrastructure;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -10,6 +11,8 @@ namespace Sources.Codebase.Helpers
         private readonly EnemyBallsPool _enemyBallsPool;
         private readonly ICoroutineRunner _coroutineRunner;
         private const float StartingXAxis = 8f;
+        private const int MinYAxis = -3;
+        private const int MaxYAxis = 3;
         private float _timeBetweenSpawns;
         private Difficulty _difficulty;
         private Coroutine _currentGeneratingRoutine;
@@ -52,7 +55,7 @@ namespace Sources.Codebase.Helpers
             while (true)
             {
                 var actualEnemy = _enemyBallsPool.Spawn();
-                actualEnemy.transform.position = new Vector3(StartingXAxis, Random.Range(-3, 3));
+                actualEnemy.transform.position = new Vector3(StartingXAxis, Random.Range(MinYAxis, MaxYAxis));
                 actualEnemy.SetDifficulty(_difficulty);
                 actualEnemy.gameObject.SetActive(true);
                 yield return new WaitForSeconds(_timeBetweenSpawns);

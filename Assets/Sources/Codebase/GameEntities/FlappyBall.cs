@@ -2,13 +2,17 @@
 using System.Collections;
 using UnityEngine;
 
-namespace Sources.Codebase
+namespace Sources.Codebase.GameEntities
 {
     [RequireComponent(typeof(CircleCollider2D))]
     public class FlappyBall : MonoBehaviour
     {
+        private const float SecondsBetweenIncrease = 15f;
+        private const float SpeedIncreasingFactor = 0.25f;
+        private const float VerticalSpeedDefault = 1f;
+        private const float VerticalSpeedMultiplier = 0.01f;
         public event Action OnCollidedWithObstacle;
-        private float _verticalSpeed = 1f;
+        private float _verticalSpeed = VerticalSpeedDefault;
         private Transform _cachedTransform;
         private Coroutine _currentMovementRoutine;
         private Coroutine _currentSpeedIncreasingRoutine;
@@ -27,7 +31,7 @@ namespace Sources.Codebase
         public void Reset()
         {
             transform.position = Vector3.zero;
-            _verticalSpeed = 1f;
+            _verticalSpeed = VerticalSpeedDefault;
             _isDowning = true;
         }
 
@@ -59,12 +63,12 @@ namespace Sources.Codebase
 
         private void MoveDown()
         {
-            _cachedTransform.position = _cachedTransform.position + Vector3.down * (0.01f * _verticalSpeed);
+            _cachedTransform.position = _cachedTransform.position + Vector3.down * (VerticalSpeedMultiplier * _verticalSpeed);
         }
 
         private void MoveUp()
         {
-            _cachedTransform.position = _cachedTransform.position + Vector3.up * (0.01f * _verticalSpeed);
+            _cachedTransform.position = _cachedTransform.position + Vector3.up * (VerticalSpeedMultiplier * _verticalSpeed);
         }
 
         private IEnumerator Move()
@@ -88,8 +92,8 @@ namespace Sources.Codebase
         {
             while (true)
             {
-                yield return new WaitForSeconds(15f);
-                _verticalSpeed += 0.25f;
+                yield return new WaitForSeconds(SecondsBetweenIncrease);
+                _verticalSpeed += SpeedIncreasingFactor;
             }
         }
 
