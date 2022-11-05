@@ -7,7 +7,7 @@ namespace Sources.Codebase
     [RequireComponent(typeof(CircleCollider2D))]
     public class FlappyBall : MonoBehaviour
     {
-        public event Action OnCollidedWithLine;
+        public event Action OnCollidedWithObstacle;
         private float _verticalSpeed = 1f;
         private Transform _cachedTransform;
         private Coroutine _currentMovementRoutine;
@@ -40,7 +40,14 @@ namespace Sources.Codebase
         {
             if (collision.collider.transform.parent.TryGetComponent(out Line line))
             {
-                OnCollidedWithLine?.Invoke();
+                OnCollidedWithObstacle?.Invoke();
+                return;
+            }
+
+            if (collision.collider.TryGetComponent(out EnemyBall ball))
+            {
+                OnCollidedWithObstacle?.Invoke();
+                return;
             }
         }
 

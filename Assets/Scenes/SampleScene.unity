@@ -241,6 +241,7 @@ MonoBehaviour:
   EndGameUIRootPrefab: {fileID: 5518256873046424691, guid: e5d56bd86318b7d43865ff82bdaa7b40, type: 3}
   FlappyBallPrefab: {fileID: 2520947594299064436, guid: b317731d6b42bac4b866659815aea424, type: 3}
   LinePrefab: {fileID: 6555372216705926192, guid: b63729afedb93b84a8b61fa76c76906c, type: 3}
+  EnemyBallPrefab: {fileID: 6860633511633703712, guid: fdd1e1602c4acc44cadedcc0caa0b733, type: 3}
 --- !u!4 &1043977350
 Transform:
   m_ObjectHideFlags: 0

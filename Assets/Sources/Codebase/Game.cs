@@ -14,6 +14,7 @@ namespace Sources.Codebase
         [SerializeField] private EndGameUIRoot EndGameUIRootPrefab;
         [SerializeField] private FlappyBall FlappyBallPrefab;
         [SerializeField] private Line LinePrefab;
+        [SerializeField] private EnemyBall EnemyBallPrefab;
         private Camera _mainCamera;
         private MainMenuRoot _mainMenuRoot;
         private GameLoopUIRoot _gameLoopUIRoot;
@@ -26,6 +27,7 @@ namespace Sources.Codebase
         private readonly Line[] _lines = new Line[2];
         private TimeCounter _timeCounter;
         private int _attemptsCount;
+        private EnemyBallsGenerator _enemyBallsGenerator;
 
         private void Start()
         {
@@ -57,9 +59,16 @@ namespace Sources.Codebase
 
             _gameLoopUIRoot.UpButton.OnButtonDown += () => _flappyBall.GetUp();
             _gameLoopUIRoot.UpButton.OnButtonUp += () => _flappyBall.GetDown();
-
+            InstallEnemyGenerator();
             _levelRoot.gameObject.SetActive(false);
 
+        }
+
+        private void InstallEnemyGenerator()
+        {
+            var enemyBallsPool = new EnemyBallsPool(EnemyBallPrefab, _levelRoot.transform);
+            _enemyBallsGenerator = new EnemyBallsGenerator(enemyBallsPool, this);
+            
         }
 
         private void UpdateDifficultyForLines()
@@ -70,9 +79,9 @@ namespace Sources.Codebase
             }
         }
 
-        private void BallCollidedWithLineHandler()
+        private void BallCollidedWithObstacleHandler()
         {
-            _flappyBall.OnCollidedWithLine -= BallCollidedWithLineHandler; 
+            _flappyBall.OnCollidedWithObstacle -= BallCollidedWithObstacleHandler; 
             EndGame();
         }
 
@@ -105,8 +114,9 @@ namespace Sources.Codebase
         private void ResetAndEnableLevel()
         {
             _flappyBall.Reset();
-            _flappyBall.OnCollidedWithLine += BallCollidedWithLineHandler;
+            _flappyBall.OnCollidedWithObstacle += BallCollidedWithObstacleHandler;
             _levelRoot.gameObject.SetActive(true);
+            _enemyBallsGenerator.Enable(_selectedDifficulty);
             _timeCounter.OnTimePassed += UpdatePassedTimeLabel;
             _timeCounter.Start();
         }
@@ -114,6 +124,7 @@ namespace Sources.Codebase
         private void EndGame()
         {
             _attemptsCount++;
+            _enemyBallsGenerator.Disable();
             _levelRoot.gameObject.SetActive(false);
             _endGameUIRoot.gameObject.SetActive(true);
             _timeCounter.OnTimePassed -= UpdatePassedTimeLabel;
