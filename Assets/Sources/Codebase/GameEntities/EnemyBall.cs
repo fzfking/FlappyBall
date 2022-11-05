@@ -45,7 +45,7 @@ namespace Sources.Codebase.GameEntities
             var position = transform.position;
             while (true)
             {
-                position.x -= _speed * DefaultSpeedMultiplier;
+                position.x -= _speed * DefaultSpeedMultiplier * Time.deltaTime;
                 transform.position = position;
                 if (transform.position.x < OffScreenEdge.x)
                 {

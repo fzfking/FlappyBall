@@ -132,4 +132,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   OffScreenEdge: {x: -10, y: 0, z: 0}
-  DefaultSpeedMultiplier: 0.01
+  DefaultSpeedMultiplier: 1

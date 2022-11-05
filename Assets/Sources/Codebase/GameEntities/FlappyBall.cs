@@ -9,10 +9,10 @@ namespace Sources.Codebase.GameEntities
     {
         private const float SecondsBetweenIncrease = 15f;
         private const float SpeedIncreasingFactor = 0.25f;
-        private const float VerticalSpeedDefault = 1f;
-        private const float VerticalSpeedMultiplier = 0.01f;
+        [SerializeField] private float VerticalSpeedDefault;
+        [SerializeField] private float VerticalSpeedMultiplier;
         public event Action OnCollidedWithObstacle;
-        private float _verticalSpeed = VerticalSpeedDefault;
+        private float _verticalSpeed;
         private Transform _cachedTransform;
         private Coroutine _currentMovementRoutine;
         private Coroutine _currentSpeedIncreasingRoutine;
@@ -38,6 +38,7 @@ namespace Sources.Codebase.GameEntities
         private void Awake()
         {
             _cachedTransform = transform;
+            _verticalSpeed = VerticalSpeedDefault;
         }
 
         private void OnCollisionEnter2D(Collision2D collision)
@@ -63,12 +64,12 @@ namespace Sources.Codebase.GameEntities
 
         private void MoveDown()
         {
-            _cachedTransform.position = _cachedTransform.position + Vector3.down * (VerticalSpeedMultiplier * _verticalSpeed);
+            _cachedTransform.position = _cachedTransform.position + Vector3.down * (VerticalSpeedMultiplier * _verticalSpeed * Time.deltaTime);
         }
 
         private void MoveUp()
         {
-            _cachedTransform.position = _cachedTransform.position + Vector3.up * (VerticalSpeedMultiplier * _verticalSpeed);
+            _cachedTransform.position = _cachedTransform.position + Vector3.up * (VerticalSpeedMultiplier * _verticalSpeed * Time.deltaTime);
         }
 
         private IEnumerator Move()
