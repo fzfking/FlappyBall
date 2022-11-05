@@ -39,6 +39,10 @@ namespace Sources.Codebase.GameEntities
         {
             _cachedTransform = transform;
             _verticalSpeed = VerticalSpeedDefault;
+            if (Application.platform == RuntimePlatform.Android)
+            {
+                Input.backButtonLeavesApp = true;
+            }
         }
 
         private void OnCollisionEnter2D(Collision2D collision)
