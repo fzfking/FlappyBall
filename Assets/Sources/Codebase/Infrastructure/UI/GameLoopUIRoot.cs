@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Globalization;
 using System.Text;
-using Sources.Codebase.Infrastructure.UI;
 using TMPro;
 using UnityEngine;
 
-namespace Sources.Codebase.Helpers
+namespace Sources.Codebase.Infrastructure.UI
 {
     public class GameLoopUIRoot : UIRoot
     {
@@ -21,7 +20,7 @@ namespace Sources.Codebase.Helpers
 
         public void SetTimePassedLabel(TimeSpan timeSpan)
         {
-            _timePassedLabel.text = _stringBuilder.ToString().Replace("{time}", timeSpan.TotalSeconds.ToString(CultureInfo.InvariantCulture));
+            _timePassedLabel.text = _stringBuilder.ToString().Replace("{time}", timeSpan.TotalSeconds.ToString("F1",CultureInfo.InvariantCulture));
         }
     }
 }

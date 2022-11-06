@@ -131,5 +131,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6de575acd2f4100a9d9a50ad0ba4042, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  OffScreenEdge: {x: -10, y: 0, z: 0}
+  OffScreenEdge: {x: -16, y: 0, z: 0}
   DefaultSpeedMultiplier: 1

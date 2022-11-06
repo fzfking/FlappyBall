@@ -8,7 +8,7 @@ namespace Sources.Codebase.Helpers
     public class EnemyBallsPool
     {
         private const int DefaultCapacity = 3;
-        private List<EnemyBall> _balls = new List<EnemyBall>(DefaultCapacity);
+        private readonly List<EnemyBall> _balls = new List<EnemyBall>(DefaultCapacity);
         private readonly EnemyBall _prefab;
         private readonly Transform _parent;
         public EnemyBallsPool(EnemyBall prefab, Transform parent)

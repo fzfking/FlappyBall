@@ -10,7 +10,7 @@ namespace Sources.Codebase.Helpers
     {
         private readonly EnemyBallsPool _enemyBallsPool;
         private readonly ICoroutineRunner _coroutineRunner;
-        private const float StartingXAxis = 8f;
+        private const float StartingXAxis = 14f;
         private const int MinYAxis = -3;
         private const int MaxYAxis = 3;
         private float _timeBetweenSpawns;

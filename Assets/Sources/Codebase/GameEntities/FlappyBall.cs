@@ -107,5 +107,10 @@ namespace Sources.Codebase.GameEntities
             StopCoroutine(_currentMovementRoutine);
             StopCoroutine(_currentSpeedIncreasingRoutine);
         }
+
+        private void OnDestroy()
+        {
+            OnCollidedWithObstacle = null;
+        }
     }
 }

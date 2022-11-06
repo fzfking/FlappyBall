@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text;
-using Sources.Codebase.Helpers;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -33,6 +32,14 @@ namespace Sources.Codebase.Infrastructure.UI
         public void SetAttemptsCount(int count)
         {
             AttemptsCountLabel.text = _attemptCountStringBuilder.ToString().Replace("{count}", count.ToString());
+        }
+
+        private void OnDestroy()
+        {
+            RestartButton.onClick.RemoveAllListeners();
+            ChangeDifficultyButton.onClick.RemoveAllListeners();
+            OnRestartClicked = null;
+            OnChangeDifficultyClicked = null;
         }
     }
 }

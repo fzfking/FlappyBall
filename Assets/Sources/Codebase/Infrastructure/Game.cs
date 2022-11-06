@@ -48,12 +48,13 @@ namespace Sources.Codebase.Infrastructure
 
         private void InstallGameLevel()
         {
+            var linePositionOffset = new Vector3(0, 4.5f, 0);
             _levelRoot.transform.position = Vector3.zero;
             _flappyBall = Instantiate(FlappyBallPrefab, _levelRoot.transform);
             _lines[0] = Instantiate(LinePrefab, _levelRoot.transform);
-            _lines[0].Transform.position = new Vector3(5, 4.5f, 0);
+            _lines[0].Transform.position = linePositionOffset;
             _lines[1] = Instantiate(LinePrefab, _levelRoot.transform);
-            _lines[1].Transform.position = new Vector3(5, -4.5f, 0);
+            _lines[1].Transform.position = -linePositionOffset;
 
             _uiProvider.GameLoopUIButtonUp.OnButtonDown += () => _flappyBall.GetUp();
             _uiProvider.GameLoopUIButtonUp.OnButtonUp += () => _flappyBall.GetDown();
