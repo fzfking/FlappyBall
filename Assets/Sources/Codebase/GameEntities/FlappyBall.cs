@@ -11,6 +11,7 @@ namespace Sources.Codebase.GameEntities
         private const float SpeedIncreasingFactor = 0.25f;
         [SerializeField] private float VerticalSpeedDefault;
         [SerializeField] private float VerticalSpeedMultiplier;
+        [SerializeField] private FireLauncher FireLauncher;
         public event Action OnCollidedWithObstacle;
         private float _verticalSpeed;
         private Transform _cachedTransform;
@@ -21,11 +22,13 @@ namespace Sources.Codebase.GameEntities
         public void GetUp()
         {
             _isDowning = false;
+            FireLauncher.Enable();
         }
 
         public void GetDown()
         {
             _isDowning = true;
+            FireLauncher.Disable();
         }
 
         public void Reset()
