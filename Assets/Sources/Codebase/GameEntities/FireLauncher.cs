@@ -37,8 +37,6 @@ namespace Sources.Codebase.GameEntities
         {
             FireSprite.gameObject.SetActive(false);
             _mainParticles.loop = false;
-            //ParticleSystem.Stop();
-
         }
     }
 }
